@@ -7,8 +7,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="IR-AIS API")
 
+# Explicit origins are required when allow_credentials=True
 origins = [
-    "*",
+    "https://prabandh-new.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
