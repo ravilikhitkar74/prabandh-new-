@@ -29,8 +29,8 @@ def shadow_merge(
     if conflict_id == "CONF-0901-0902":
         target_id = "CONF-8821"
     
-    # 2. Keep our old backup logic just in case the frontend sends a BLK ID
-    elif conflict_id.startswith("BLK"):
+    # 2. FIX: Catch BOTH 'BLK-' (seeded) and 'REQ-' (newly created) Block IDs!
+    elif conflict_id.startswith("BLK") or conflict_id.startswith("REQ"):
         conflict = db.scalar(
             select(Conflict).where(
                 (Conflict.block_a_id == conflict_id) | (Conflict.block_b_id == conflict_id)
@@ -43,6 +43,6 @@ def shadow_merge(
     else:
         target_id = conflict_id
 
-    # 3. Now pass the correct target_id (CONF-8821) to the engine
+    # 3. Now pass the correct target_id to the engine
     merged_block = merge_shadow_block(db, target_id)
     return merged_block
