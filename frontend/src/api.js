@@ -1,6 +1,6 @@
-// --- LOCAL DEVELOPMENT UPDATE ---
-// Change 8000 to match whatever port your backend terminal is running on
-const API_BASE = "http://localhost:8000/api";
+// --- PRODUCTION DEPLOYMENT UPDATE ---
+// Pointing to the live Render backend
+const API_BASE = "https://prabandh-new.onrender.com/api";
 
 let authToken = null;
 
