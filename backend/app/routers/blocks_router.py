@@ -6,13 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import Block, User
-from app.schemas import BlockCreate, BlockOut
 from app.models import Block, Conflict, User
+from app.schemas import BlockCreate, BlockOut
 from app.solver.conflict_engine import detect_conflicts
 
 router = APIRouter()
-
 
 @router.get("/blocks", response_model=list[BlockOut])
 def get_blocks(
@@ -21,7 +19,6 @@ def get_blocks(
 ):
     stmt = select(Block)
     return list(db.scalars(stmt).all())
-
 
 @router.post("/blocks", response_model=BlockOut)
 def create_block(
@@ -142,8 +139,10 @@ def complete_block(
     if not block:
         raise HTTPException(404, "Block not found")
 
-    if block.status != "APPROVED":
-        raise HTTPException(400, f"Cannot complete a block with status '{block.status}' — only APPROVED blocks can be marked complete")
+    # FIX: Allow BOTH standard approved and shadow integrated approved blocks to be marked done
+    valid_statuses = ["APPROVED", "INTEGRATED_SHADOW_APPROVED"]
+    if block.status not in valid_statuses:
+        raise HTTPException(400, f"Cannot complete a block with status '{block.status}' — only Approved blocks can be marked complete")
 
     block.status = "COMPLETED"
     db.commit()
