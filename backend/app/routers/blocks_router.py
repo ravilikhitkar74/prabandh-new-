@@ -132,31 +132,35 @@ def complete_block(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if current_user.role not in ("DEPT_TMS", "DEPT_TDMS", "DEPT_SMMS") and current_user.portalType != "DEPT":
+    if current_user.portalType != "DEPT" and current_user.role not in ("DEPT_TMS", "DEPT_TDMS", "DEPT_SMMS", "Civil Engineer", "Traction Engineer", "Signal Engineer"):
         raise HTTPException(403, "Only department users can mark work as completed")
 
     block = db.get(Block, block_id)
     if not block:
         raise HTTPException(404, "Block not found")
 
-    # --- STRICT SECURITY FIX: Fail Closed Authorization ---
+    # --- STRICT SECURITY FIX: Handle plain English roles ---
     allowed_dept_keyword = None
+    role_check = current_user.role.lower()
     
-    if current_user.role == "DEPT_TMS":
+    # Check if they are civil
+    if "tms" in role_check or "civil" in role_check:
         allowed_dept_keyword = "civil"
-    elif current_user.role == "DEPT_TDMS":
+    # Check if they are traction
+    elif "tdms" in role_check or "traction" in role_check:
         allowed_dept_keyword = "traction"
-    elif current_user.role == "DEPT_SMMS":
+    # Check if they are signal
+    elif "smms" in role_check or "signal" in role_check:
         allowed_dept_keyword = "signal"
         
-    # FAIL CLOSED: If we don't explicitly know their department, block them immediately.
+    # FAIL CLOSED: If we still don't recognize it, block them.
     if not allowed_dept_keyword:
         raise HTTPException(
             status_code=403, 
             detail=f"Access Denied: Unrecognized department role ({current_user.role})."
         )
         
-    # Now execute the strict match
+    # Now execute the strict match against the block's assigned department
     if allowed_dept_keyword not in block.department.lower():
         raise HTTPException(
             status_code=403, 
