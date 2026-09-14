@@ -2,13 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 
-# --- THE FIX ---
-# Import your models BEFORE create_all so SQLAlchemy knows what to build.
-# If your file is named something else, change 'models' to match!
+# Import models so SQLAlchemy knows what to build
 from app import models 
+# --- IMPORT THE SEED FUNCTION ---
+from app.seed import seed 
 
-# Automatically create database tables on startup if they don't exist yet
+# Automatically create database tables on startup
 Base.metadata.create_all(bind=engine)
+
+# --- RUN THE SEED FUNCTION TO POPULATE USERS ---
+seed() 
 
 app = FastAPI(title="IR-AIS API")
 
@@ -26,7 +29,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
