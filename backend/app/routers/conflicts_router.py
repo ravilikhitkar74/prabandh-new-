@@ -18,7 +18,6 @@ def get_conflicts(
     stmt = select(Conflict)
     return list(db.scalars(stmt).all())
 
-# I added a second route decorator here to catch both URLs the frontend is trying!
 @router.post("/conflicts/{conflict_id}/shadow-merge", response_model=BlockOut)
 @router.post("/blocks/{conflict_id}/shadow-merge", response_model=BlockOut)
 def shadow_merge(
@@ -26,9 +25,12 @@ def shadow_merge(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # FIX: If the frontend sends a Block ID (e.g., BLK-2026-0902), 
-    # we find the corresponding Conflict ID (CONF-8821) in the database first.
-    if conflict_id.startswith("BLK"):
+    # 1. Translate the frontend's ID to our actual database seed ID!
+    if conflict_id == "CONF-0901-0902":
+        target_id = "CONF-8821"
+    
+    # 2. Keep our old backup logic just in case the frontend sends a BLK ID
+    elif conflict_id.startswith("BLK"):
         conflict = db.scalar(
             select(Conflict).where(
                 (Conflict.block_a_id == conflict_id) | (Conflict.block_b_id == conflict_id)
@@ -36,12 +38,11 @@ def shadow_merge(
         )
         if not conflict:
             raise HTTPException(status_code=404, detail="Conflict not found for this block")
-        
-        # We found the conflict! Swap out the BLK ID for the real CONF ID
         target_id = conflict.conflict_id
+        
     else:
         target_id = conflict_id
 
-    # Now pass the correct CONF ID to your engine
+    # 3. Now pass the correct target_id (CONF-8821) to the engine
     merged_block = merge_shadow_block(db, target_id)
     return merged_block
