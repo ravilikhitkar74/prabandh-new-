@@ -139,6 +139,22 @@ def complete_block(
     if not block:
         raise HTTPException(404, "Block not found")
 
+    # --- SECURITY FIX: Department Authorization Check ---
+    allowed_dept_keyword = ""
+    if current_user.role == "DEPT_TMS":
+        allowed_dept_keyword = "civil"
+    elif current_user.role == "DEPT_TDMS":
+        allowed_dept_keyword = "traction"
+    elif current_user.role == "DEPT_SMMS":
+        allowed_dept_keyword = "signal"
+        
+    if allowed_dept_keyword and allowed_dept_keyword not in block.department.lower():
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Access Denied: You cannot mark {block.department} work as complete."
+        )
+    # ----------------------------------------------------
+
     # FIX: Allow BOTH standard approved and shadow integrated approved blocks to be marked done
     valid_statuses = ["APPROVED", "INTEGRATED_SHADOW_APPROVED"]
     if block.status not in valid_statuses:
