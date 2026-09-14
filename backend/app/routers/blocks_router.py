@@ -139,8 +139,9 @@ def complete_block(
     if not block:
         raise HTTPException(404, "Block not found")
 
-    # --- SECURITY FIX: Department Authorization Check ---
-    allowed_dept_keyword = ""
+    # --- STRICT SECURITY FIX: Fail Closed Authorization ---
+    allowed_dept_keyword = None
+    
     if current_user.role == "DEPT_TMS":
         allowed_dept_keyword = "civil"
     elif current_user.role == "DEPT_TDMS":
@@ -148,12 +149,20 @@ def complete_block(
     elif current_user.role == "DEPT_SMMS":
         allowed_dept_keyword = "signal"
         
-    if allowed_dept_keyword and allowed_dept_keyword not in block.department.lower():
+    # FAIL CLOSED: If we don't explicitly know their department, block them immediately.
+    if not allowed_dept_keyword:
         raise HTTPException(
             status_code=403, 
-            detail=f"Access Denied: You cannot mark {block.department} work as complete."
+            detail=f"Access Denied: Unrecognized department role ({current_user.role})."
         )
-    # ----------------------------------------------------
+        
+    # Now execute the strict match
+    if allowed_dept_keyword not in block.department.lower():
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Access Denied: Your role ({current_user.role}) cannot mark {block.department} work as complete."
+        )
+    # ------------------------------------------------------
 
     # FIX: Allow BOTH standard approved and shadow integrated approved blocks to be marked done
     valid_statuses = ["APPROVED", "INTEGRATED_SHADOW_APPROVED"]
