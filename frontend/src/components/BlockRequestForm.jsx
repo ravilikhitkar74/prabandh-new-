@@ -6,7 +6,10 @@ export default function BlockRequestForm({ currentUser, onSubmitSuccess, onCance
   // Common Fields
   const [section, setSection] = useState('BPL - ET (Bhopal – Itarsi)');
   const [track, setTrack] = useState('DN Main');
-  const [date, setDate] = useState('2026-09-09');
+  
+  // DYNAMIC DATE: Automatically sets to today's date (YYYY-MM-DD)
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  
   const [startTime, setStartTime] = useState('10:00');
   const [endTime, setEndTime] = useState('14:00');
 
