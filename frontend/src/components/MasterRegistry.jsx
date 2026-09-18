@@ -12,15 +12,24 @@ export default function MasterRegistry({
   lang = 'en' 
 }) {
   const [filter, setFilter] = useState('ALL'); 
+  // ADDED: Local state to track demo rejections without hitting the backend
+  const [rejectedBlocks, setRejectedBlocks] = useState([]);
+
+  const handleRejectMock = (blockId) => {
+    setRejectedBlocks((prev) => [...prev, blockId]);
+  };
 
   const safeBlocks = Array.isArray(blocks) ? blocks : [];
 
   const filteredBlocks = safeBlocks.filter((b) => {
-    const status = String(b?.status || '');
+    // Intercept the status: if it's in our local rejected list, force it to 'REJECTED'
+    const isLocallyRejected = rejectedBlocks.includes(b.id);
+    const status = isLocallyRejected ? 'REJECTED' : String(b?.status || '');
+    
     if (filter === 'CONFLICT') return status === 'CONFLICT_DETECTED';
     if (filter === 'PENDING') return status === 'PENDING_SANCTION';
     if (filter === 'APPROVED') return status.includes('APPROVED') || status === 'COMPLETED'; 
-    return true;
+    return true; // 'ALL' shows everything, including REJECTED
   });
 
   return (
@@ -92,12 +101,16 @@ export default function MasterRegistry({
           </thead>
           <tbody className="divide-y divide-slate-800/60 font-sans">
             {filteredBlocks.map((b) => {
-              const statusStr = String(b?.status || '');
+              // Override status for demo rejections
+              const isLocallyRejected = rejectedBlocks.includes(b.id);
+              const statusStr = isLocallyRejected ? 'REJECTED' : String(b?.status || '');
+              
               const isConflict = statusStr === 'CONFLICT_DETECTED';
               const isPending = statusStr === 'PENDING_SANCTION';
               const isApproved = statusStr.includes('APPROVED');
               const isShadow = statusStr.includes('SHADOW');
               const isCompleted = statusStr === 'COMPLETED';
+              const isRejected = statusStr === 'REJECTED';
 
               const hasPowerCut =
                 b?.power_cut === true ||
@@ -105,10 +118,10 @@ export default function MasterRegistry({
                 String(b?.ohe_power_cut || '').toUpperCase().includes('YES');
 
               return (
-                <tr key={b.id} className="hover:bg-slate-900/50 transition-colors">
+                <tr key={b.id} className={`transition-colors ${isRejected ? 'opacity-60 bg-rose-950/10' : 'hover:bg-slate-900/50'}`}>
                   {/* Block ID & Dept */}
                   <td className="py-3 px-3">
-                    <div className="font-mono font-bold text-blue-400">{b.id}</div>
+                    <div className={`font-mono font-bold ${isRejected ? 'text-slate-500' : 'text-blue-400'}`}>{b.id}</div>
                     <div className="text-[11px] text-slate-400">{b.department || (lang === 'hi' ? 'इंजीनियरिंग' : 'Engineering')}</div>
                   </td>
 
@@ -129,7 +142,7 @@ export default function MasterRegistry({
                     </div>
                   </td>
 
-                  {/* Window & Duration - PERMANENT DYNAMIC DATE */}
+                  {/* Window & Duration */}
                   <td className="py-3 px-3 font-mono">
                     <div className="text-[13px] font-bold text-slate-100 mb-0.5">
                       {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -145,6 +158,17 @@ export default function MasterRegistry({
 
                   {/* Status Badge */}
                   <td className="py-3 px-3">
+                    {isRejected && (
+                      <div className="space-y-1">
+                        <span className="inline-block bg-rose-950 border border-rose-800 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded">
+                          {lang === 'hi' ? 'अस्वीकृत' : 'REJECTED'}
+                        </span>
+                        <div className="text-[10px] text-slate-500 font-mono">
+                          {lang === 'hi' ? 'DOM द्वारा अस्वीकृत' : 'Denied by DOM'}
+                        </div>
+                      </div>
+                    )}
+                  
                     {isConflict && (
                       <div className="space-y-1">
                         <span className="inline-block bg-rose-950/80 border border-rose-700/60 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded">
@@ -206,6 +230,11 @@ export default function MasterRegistry({
                   <td className="py-3 px-3 text-right">
                     {isApprover ? (
                       <div className="flex justify-end">
+                        {isRejected && (
+                          <span className="text-rose-500 text-xs font-mono font-bold">
+                            {lang === 'hi' ? 'अस्वीकृत ✗' : 'Rejected ✗'}
+                          </span>
+                        )}
                         {isConflict && (
                           <button
                             onClick={() => onExecuteShadowMerge && onExecuteShadowMerge("CONF-0901-0902")}
@@ -219,7 +248,7 @@ export default function MasterRegistry({
                         {isPending && (
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => alert(lang === 'hi' ? 'मॉक डेमो: ब्लॉक को अस्वीकार कर दिया गया है और पुनर्निर्धारण के लिए विभाग को वापस भेज दिया गया है।' : 'Mock Demo: Block rejected and sent back to department for rescheduling.')}
+                              onClick={() => handleRejectMock(b.id)}
                               className="px-3 py-1 bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 font-bold text-xs rounded transition shadow cursor-pointer"
                             >
                               {lang === 'hi' ? 'अस्वीकार करें' : 'Reject'}
@@ -245,6 +274,11 @@ export default function MasterRegistry({
                       </div>
                     ) : (
                       <div className="flex justify-end">
+                        {isRejected && (
+                          <span className="text-rose-500 text-[11px] font-mono font-bold">
+                            {lang === 'hi' ? 'अस्वीकृत ✗' : 'Rejected ✗'}
+                          </span>
+                        )}
                         {isConflict && (
                           <span className="text-amber-400 text-[11px] font-mono">
                             {lang === 'hi' ? 'टकराव समीक्षा में' : 'In Conflict Review'}
