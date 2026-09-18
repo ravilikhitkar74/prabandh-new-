@@ -130,9 +130,12 @@ export default function MasterRegistry({
                     </div>
                   </td>
 
-                  {/* Window & Duration */}
+                  {/* Window & Duration - UPDATED WITH DATE FORMATTING */}
                   <td className="py-3 px-3 font-mono">
-                    <div className="text-slate-200">{b.time_window}</div>
+                    <div className="text-[13px] font-bold text-slate-100 mb-0.5">
+                      {b.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </div>
+                    <div className="text-slate-300">{b.time_window}</div>
                     <div className="text-[11px] text-slate-500">{b.duration}</div>
                   </td>
 
