@@ -65,7 +65,6 @@ export default function App() {
     }
   };
 
-  // Polling disabled to keep local demo state permanently locked and flawless
   useEffect(() => {
     if (user) {
       fetchAllData();
@@ -82,11 +81,11 @@ export default function App() {
     }
   };
 
-  // --- BULLETPROOF UNIVERSAL WILDCARD BATCH HANDLER ---
+  // --- FINAL BULLETPROOF UNIVERSAL WILDCARD BATCH HANDLER ---
   const handleExecuteShadowMerge = async (targetId) => {
     const toastId = toast.loading('Executing Universal AI Shadow Bundle...');
     
-    // FORCE EVERY SINGLE ROW ON THE SCREEN TO CONVERT TO AN INTEGRATED SHADOW APPROVED BLOCK
+    // 1. CONVERT ALL BLOCKS TO INTEGRATED SHADOW APPROVED STATUS
     setBlocks(prev => prev.map(b => {
       return {
         ...b,
@@ -96,7 +95,10 @@ export default function App() {
       };
     }));
 
-    // CLEAR ALL CONFLICT/PENDING STATS INSTANTLY
+    // 2. CLEAR CONFLICTS ARRAY INSTANTLY SO DASHBOARD CARD DISAPPEARS
+    setConflicts([]);
+
+    // 3. UPDATE DASHBOARD STATS
     setStats(prev => ({
       ...prev,
       pending_approvals: 0,
