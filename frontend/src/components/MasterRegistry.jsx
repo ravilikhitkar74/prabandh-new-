@@ -5,7 +5,7 @@ export default function MasterRegistry({
   conflicts = [],
   user,
   onSanctionBlock, 
-  onRejectBlock, /* NEW PROP ADDED HERE */
+  onRejectBlock, 
   onExecuteShadowMerge, 
   onMarkComplete,
   isApprover = false,
@@ -219,27 +219,20 @@ export default function MasterRegistry({
                             {lang === 'hi' ? 'अस्वीकृत ✗' : 'Rejected ✗'}
                           </span>
                         )}
-                        {isConflict && (() => {
-                          const matchingConflict = conflicts.find(
-                            (c) => c.block_a_id === b.id || c.block_b_id === b.id
-                          );
-                          return (
-                            <button
-                              onClick={() => {
-                                const targetId = matchingConflict ? matchingConflict.conflict_id : "CONF-0901-0902";
-                                if (onExecuteShadowMerge) onExecuteShadowMerge(targetId);
-                              }}
-                              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded shadow transition cursor-pointer flex items-center space-x-1"
-                              title="Execute 1-Click AI Shadow Bundling"
-                            >
-                              <span>⚡</span>
-                              <span>{lang === 'hi' ? 'AI शैडो मर्ज' : 'AI Shadow Merge'}</span>
-                            </button>
-                          );
-                        })()}
+                        {isConflict && (
+                          <button
+                            onClick={() => {
+                              if (onExecuteShadowMerge) onExecuteShadowMerge(b.id);
+                            }}
+                            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded shadow transition cursor-pointer flex items-center space-x-1"
+                            title="Execute 1-Click AI Shadow Bundling"
+                          >
+                            <span>⚡</span>
+                            <span>{lang === 'hi' ? 'AI शैडो मर्ज' : 'AI Shadow Merge'}</span>
+                          </button>
+                        )}
                         {isPending && (
                           <div className="flex items-center gap-2">
-                            {/* REAL REJECT BUTTON WIRED UP HERE */}
                             <button
                               onClick={() => onRejectBlock && onRejectBlock(b.id)}
                               className="px-3 py-1 bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 font-bold text-xs rounded transition shadow cursor-pointer"
