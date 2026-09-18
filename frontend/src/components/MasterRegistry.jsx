@@ -217,12 +217,20 @@ export default function MasterRegistry({
                           </button>
                         )}
                         {isPending && (
-                          <button
-                            onClick={() => onSanctionBlock && onSanctionBlock(b.id)}
-                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded transition shadow cursor-pointer"
-                          >
-                            {lang === 'hi' ? 'प्राइवेट नंबर जारी करें और स्वीकृत करें' : 'Issue Private No. & Sanction'}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => alert(lang === 'hi' ? 'मॉक डेमो: ब्लॉक को अस्वीकार कर दिया गया है और पुनर्निर्धारण के लिए विभाग को वापस भेज दिया गया है।' : 'Mock Demo: Block rejected and sent back to department for rescheduling.')}
+                              className="px-3 py-1 bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 font-bold text-xs rounded transition shadow cursor-pointer"
+                            >
+                              {lang === 'hi' ? 'अस्वीकार करें' : 'Reject'}
+                            </button>
+                            <button
+                              onClick={() => onSanctionBlock && onSanctionBlock(b.id)}
+                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded transition shadow cursor-pointer"
+                            >
+                              {lang === 'hi' ? 'प्राइवेट नंबर जारी करें और स्वीकृत करें' : 'Issue Private No. & Sanction'}
+                            </button>
+                          </div>
                         )}
                         {isApproved && (
                           <span className="text-slate-400 text-xs font-mono">
