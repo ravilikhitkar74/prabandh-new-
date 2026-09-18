@@ -274,20 +274,23 @@ export default function MasterRegistry({
                       </div>
                     ) : (
                       <div className="flex justify-end">
+                        {/* 1. REJECTED gets the strict red badge */}
                         {isRejected && (
-                          <span className="text-rose-500 text-[11px] font-mono font-bold">
-                            {lang === 'hi' ? 'अस्वीकृत ✗' : 'Rejected ✗'}
+                          <span className="inline-block bg-rose-950/80 border border-rose-700/50 text-rose-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
+                            {lang === 'hi' ? 'क्लीयरेंस प्रदान नहीं किया गया' : 'CLEARANCE NOT GRANTED'}
                           </span>
                         )}
+                        
                         {isConflict && (
                           <span className="text-amber-400 text-[11px] font-mono">
                             {lang === 'hi' ? 'टकराव समीक्षा में' : 'In Conflict Review'}
                           </span>
                         )}
-                        {/* UPDATE IS HERE: Made it a bold, highlighted badge */}
+                        
+                        {/* 2. PENDING gets the yellow badge */}
                         {isPending && (
-                          <span className="inline-block bg-rose-950/80 border border-rose-700/50 text-rose-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
-                            {lang === 'hi' ? 'क्लीयरेंस प्रदान नहीं किया गया' : 'CLEARANCE NOT GRANTED'}
+                          <span className="inline-block bg-amber-950/80 border border-amber-700/50 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
+                            {lang === 'hi' ? 'अनुमोदन की प्रतीक्षा' : 'PENDING SANCTION'}
                           </span>
                         )}
                         
