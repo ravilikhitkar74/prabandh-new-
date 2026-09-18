@@ -131,6 +131,27 @@ export default function App() {
     }
   };
 
+  // --- NEW: REAL BACKEND REJECTION HANDLER ---
+  const handleRejectBlock = async (blockId) => {
+    const toastId = toast.loading('Denying clearance...');
+    try {
+      const updatedBlock = await api.rejectBlock(blockId);
+      
+      // Instantly update UI locally
+      setBlocks(prev => prev.map(b => (b.id === blockId ? updatedBlock : b)));
+      
+      // Update the dashboard counts
+      setStats(prev => ({
+        ...prev,
+        pending_approvals: Math.max(0, prev.pending_approvals - 1)
+      }));
+      
+      toast.success(`Block ${blockId} Rejected.`, { id: toastId });
+    } catch (err) {
+      toast.error(`Rejection failed: ${err.message}`, { id: toastId });
+    }
+  };
+
   // --- UPDATED: MARK BLOCK AS COMPLETED ---
   const handleMarkComplete = async (blockId) => {
     setIsProcessing(true);
@@ -341,9 +362,10 @@ export default function App() {
                 conflicts={conflicts}
                 user={user}
                 onSanctionBlock={isApprover ? handleSanctionBlock : null}
+                onRejectBlock={isApprover ? handleRejectBlock : null}  {/* PASSED TO REGISTRY HERE */}
                 onExecuteShadowMerge={handleExecuteShadowMerge}
                 onMarkComplete={handleMarkComplete}
-                isProcessing={isProcessing} /* 4. Pass down processing state! */
+                isProcessing={isProcessing} 
                 isApprover={isApprover}
                 theme={theme}
                 lang={lang}

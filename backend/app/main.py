@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from sqlalchemy.orm import Session
+from app.database import engine, Base, get_db
 
 # Import models so SQLAlchemy knows what to build
 from app import models 
@@ -33,6 +34,21 @@ app.add_middleware(
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+# --- NEW REJECT ENDPOINT ADDED HERE ---
+@app.post("/api/blocks/{block_id}/reject")
+async def reject_block(block_id: str, db: Session = Depends(get_db)):
+    # Assuming your SQLAlchemy model is named Block. 
+    # If it's named something else like BlockRequest, change models.Block below!
+    block = db.query(models.Block).filter(models.Block.id == block_id).first()
+    if not block:
+        raise HTTPException(status_code=404, detail="Block not found")
+    
+    block.status = "REJECTED"
+    db.commit()
+    db.refresh(block)
+    return block
+# --------------------------------------
 
 from app.routers.auth_router import router as auth_router
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])

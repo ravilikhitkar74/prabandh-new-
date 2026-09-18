@@ -5,6 +5,7 @@ export default function MasterRegistry({
   conflicts = [],
   user,
   onSanctionBlock, 
+  onRejectBlock, /* NEW PROP ADDED HERE */
   onExecuteShadowMerge, 
   onMarkComplete,
   isApprover = false,
@@ -12,46 +13,23 @@ export default function MasterRegistry({
   lang = 'en' 
 }) {
   const [filter, setFilter] = useState('ALL'); 
-  
-  // FIXED: Use localStorage so the browser remembers rejections across user logins!
-  const [rejectedBlocks, setRejectedBlocks] = useState(() => {
-    try {
-      const saved = localStorage.getItem('demoRejectedBlocks');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
-
-  const handleRejectMock = (blockId) => {
-    setRejectedBlocks((prev) => {
-      const newState = [...prev, blockId];
-      localStorage.setItem('demoRejectedBlocks', JSON.stringify(newState));
-      return newState;
-    });
-    alert(lang === 'hi' ? 'मॉक डेमो: ब्लॉक को अस्वीकार कर दिया गया है।' : 'Mock Demo: Block rejected.');
-  };
 
   const safeBlocks = Array.isArray(blocks) ? blocks : [];
 
   const filteredBlocks = safeBlocks.filter((b) => {
-    // Intercept the status: if it's in our local rejected list, force it to 'REJECTED'
-    const isLocallyRejected = rejectedBlocks.includes(b.id);
-    const status = isLocallyRejected ? 'REJECTED' : String(b?.status || '');
-    
+    const status = String(b?.status || '');
     if (filter === 'CONFLICT') return status === 'CONFLICT_DETECTED';
     if (filter === 'PENDING') return status === 'PENDING_SANCTION';
     if (filter === 'APPROVED') return status.includes('APPROVED') || status === 'COMPLETED'; 
-    return true; // 'ALL' shows everything, including REJECTED
+    return true; 
   }).sort((a, b) => {
-    // Sorting logic: Actions needed at top, completed/rejected at bottom
     const getStatusRank = (block) => {
-      const status = rejectedBlocks.includes(block.id) ? 'REJECTED' : String(block.status || '');
-      if (status === 'CONFLICT_DETECTED') return 1; // Highest priority (needs merge)
-      if (status === 'PENDING_SANCTION') return 2; // Needs sanction/reject
-      if (status.includes('APPROVED')) return 3; // Active permits
-      if (status === 'COMPLETED') return 4; // Finished
-      if (status === 'REJECTED') return 5; // Dead
+      const status = String(block.status || '');
+      if (status === 'CONFLICT_DETECTED') return 1; 
+      if (status === 'PENDING_SANCTION') return 2; 
+      if (status.includes('APPROVED')) return 3; 
+      if (status === 'COMPLETED') return 4; 
+      if (status === 'REJECTED') return 5; 
       return 99;
     };
     return getStatusRank(a) - getStatusRank(b);
@@ -126,9 +104,7 @@ export default function MasterRegistry({
           </thead>
           <tbody className="divide-y divide-slate-800/60 font-sans">
             {filteredBlocks.map((b) => {
-              // Override status for demo rejections
-              const isLocallyRejected = rejectedBlocks.includes(b.id);
-              const statusStr = isLocallyRejected ? 'REJECTED' : String(b?.status || '');
+              const statusStr = String(b?.status || '');
               
               const isConflict = statusStr === 'CONFLICT_DETECTED';
               const isPending = statusStr === 'PENDING_SANCTION';
@@ -263,8 +239,9 @@ export default function MasterRegistry({
                         })()}
                         {isPending && (
                           <div className="flex items-center gap-2">
+                            {/* REAL REJECT BUTTON WIRED UP HERE */}
                             <button
-                              onClick={() => handleRejectMock(b.id)}
+                              onClick={() => onRejectBlock && onRejectBlock(b.id)}
                               className="px-3 py-1 bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 font-bold text-xs rounded transition shadow cursor-pointer"
                             >
                               {lang === 'hi' ? 'अस्वीकार करें' : 'Reject'}

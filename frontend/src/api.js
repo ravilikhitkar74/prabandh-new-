@@ -31,6 +31,10 @@ export const api = {
   sanctionBlock: (blockId) =>
     request(`/blocks/${blockId}/sanction`, { method: "POST" }),
     
+  // --- NEW: Real backend rejection ---
+  rejectBlock: (blockId) =>
+    request(`/blocks/${blockId}/reject`, { method: "POST" }),
+    
   // --- NEW: Mark block as completed by department ---
   completeBlock: (blockId) =>
     request(`/blocks/${blockId}/complete`, { method: "POST" }),
