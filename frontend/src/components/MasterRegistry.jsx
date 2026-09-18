@@ -12,11 +12,24 @@ export default function MasterRegistry({
   lang = 'en' 
 }) {
   const [filter, setFilter] = useState('ALL'); 
-  // ADDED: Local state to track demo rejections without hitting the backend
-  const [rejectedBlocks, setRejectedBlocks] = useState([]);
+  
+  // FIXED: Use localStorage so the browser remembers rejections across user logins!
+  const [rejectedBlocks, setRejectedBlocks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('demoRejectedBlocks');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   const handleRejectMock = (blockId) => {
-    setRejectedBlocks((prev) => [...prev, blockId]);
+    setRejectedBlocks((prev) => {
+      const newState = [...prev, blockId];
+      localStorage.setItem('demoRejectedBlocks', JSON.stringify(newState));
+      return newState;
+    });
+    alert(lang === 'hi' ? 'मॉक डेमो: ब्लॉक को अस्वीकार कर दिया गया है।' : 'Mock Demo: Block rejected.');
   };
 
   const safeBlocks = Array.isArray(blocks) ? blocks : [];
