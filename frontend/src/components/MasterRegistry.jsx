@@ -43,6 +43,18 @@ export default function MasterRegistry({
     if (filter === 'PENDING') return status === 'PENDING_SANCTION';
     if (filter === 'APPROVED') return status.includes('APPROVED') || status === 'COMPLETED'; 
     return true; // 'ALL' shows everything, including REJECTED
+  }).sort((a, b) => {
+    // Sorting logic: Actions needed at top, completed/rejected at bottom
+    const getStatusRank = (block) => {
+      const status = rejectedBlocks.includes(block.id) ? 'REJECTED' : String(block.status || '');
+      if (status === 'CONFLICT_DETECTED') return 1; // Highest priority (needs merge)
+      if (status === 'PENDING_SANCTION') return 2; // Needs sanction/reject
+      if (status.includes('APPROVED')) return 3; // Active permits
+      if (status === 'COMPLETED') return 4; // Finished
+      if (status === 'REJECTED') return 5; // Dead
+      return 99;
+    };
+    return getStatusRank(a) - getStatusRank(b);
   });
 
   return (
@@ -287,20 +299,16 @@ export default function MasterRegistry({
                       </div>
                     ) : (
                       <div className="flex justify-end">
-                        {/* 1. REJECTED gets the strict red badge */}
                         {isRejected && (
-                          <span className="inline-block bg-rose-950/80 border border-rose-700/50 text-rose-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
-                            {lang === 'hi' ? 'क्लीयरेंस प्रदान नहीं किया गया' : 'CLEARANCE NOT GRANTED'}
+                          <span className="text-rose-500 text-[11px] font-mono font-bold">
+                            {lang === 'hi' ? 'अस्वीकृत ✗' : 'Rejected ✗'}
                           </span>
                         )}
-                        
                         {isConflict && (
                           <span className="text-amber-400 text-[11px] font-mono">
                             {lang === 'hi' ? 'टकराव समीक्षा में' : 'In Conflict Review'}
                           </span>
                         )}
-                        
-                        {/* 2. PENDING gets the yellow badge */}
                         {isPending && (
                           <span className="inline-block bg-amber-950/80 border border-amber-700/50 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
                             {lang === 'hi' ? 'अनुमोदन की प्रतीक्षा' : 'PENDING SANCTION'}
