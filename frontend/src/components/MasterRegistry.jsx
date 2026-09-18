@@ -8,10 +8,10 @@ export default function MasterRegistry({
   onExecuteShadowMerge, 
   onMarkComplete,
   isApprover = false,
-  isProcessing = false, // <-- ADDED: Receives the loading state from App.jsx
+  isProcessing = false, 
   lang = 'en' 
 }) {
-  const [filter, setFilter] = useState('ALL'); // 'ALL' | 'CONFLICT' | 'PENDING' | 'APPROVED'
+  const [filter, setFilter] = useState('ALL'); 
 
   const safeBlocks = Array.isArray(blocks) ? blocks : [];
 
@@ -19,7 +19,6 @@ export default function MasterRegistry({
     const status = String(b?.status || '');
     if (filter === 'CONFLICT') return status === 'CONFLICT_DETECTED';
     if (filter === 'PENDING') return status === 'PENDING_SANCTION';
-    // Group COMPLETED blocks under the APPROVED tab so they don't disappear
     if (filter === 'APPROVED') return status.includes('APPROVED') || status === 'COMPLETED'; 
     return true;
   });
@@ -130,10 +129,10 @@ export default function MasterRegistry({
                     </div>
                   </td>
 
-                  {/* Window & Duration - UPDATED WITH DATE FORMATTING */}
+                  {/* Window & Duration - PERMANENT DYNAMIC DATE */}
                   <td className="py-3 px-3 font-mono">
                     <div className="text-[13px] font-bold text-slate-100 mb-0.5">
-                      {b.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </div>
                     <div className="text-slate-300">{b.time_window}</div>
                     <div className="text-[11px] text-slate-500">{b.duration}</div>
