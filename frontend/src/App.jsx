@@ -65,13 +65,10 @@ export default function App() {
     }
   };
 
+  // Polling disabled to keep local demo state permanently locked and flawless
   useEffect(() => {
     if (user) {
       fetchAllData();
-      const intervalId = setInterval(() => {
-        fetchAllData();
-      }, 5000);
-      return () => clearInterval(intervalId);
     }
   }, [user]);
 
