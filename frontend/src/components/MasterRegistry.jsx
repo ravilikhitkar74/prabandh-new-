@@ -284,9 +284,10 @@ export default function MasterRegistry({
                             {lang === 'hi' ? 'टकराव समीक्षा में' : 'In Conflict Review'}
                           </span>
                         )}
+                        {/* UPDATE IS HERE: Made it a bold, highlighted badge */}
                         {isPending && (
-                          <span className="text-slate-400 text-[11px] font-mono">
-                            {lang === 'hi' ? 'वरिष्ठ DOM clearance की प्रतीक्षा है' : 'Awaiting Sr. DOM Clearance'}
+                          <span className="inline-block bg-rose-950/80 border border-rose-700/50 text-rose-400 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm tracking-wide">
+                            {lang === 'hi' ? 'क्लीयरेंस प्रदान नहीं किया गया' : 'CLEARANCE NOT GRANTED'}
                           </span>
                         )}
                         
