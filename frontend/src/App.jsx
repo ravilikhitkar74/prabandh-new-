@@ -69,9 +69,19 @@ export default function App() {
     }
   };
 
+  // --- AUTO-POLLING ADDED HERE ---
   useEffect(() => {
     if (user) {
+      // 1. Initial load when user logs in
       fetchAllData();
+      
+      // 2. Auto-polling: silently fetch new data every 5 seconds
+      const intervalId = setInterval(() => {
+        fetchAllData();
+      }, 5000);
+
+      // 3. Cleanup timer to prevent memory leaks when logging out
+      return () => clearInterval(intervalId);
     }
   }, [user]);
 
