@@ -7,9 +7,16 @@ export default function BlockRequestForm({ currentUser, onSubmitSuccess, onCance
   const [section, setSection] = useState('BPL - ET (Bhopal – Itarsi)');
   const [track, setTrack] = useState('DN Main');
   
-  // DYNAMIC DATE: Automatically sets to today's date (YYYY-MM-DD)
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  
+  // FIXED LOCAL DATE: Uses local timezone representation (YYYY-MM-DD)
+  const getLocalDateString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [date, setDate] = useState(getLocalDateString());
   const [startTime, setStartTime] = useState('10:00');
   const [endTime, setEndTime] = useState('14:00');
 
