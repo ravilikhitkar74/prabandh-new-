@@ -91,21 +91,28 @@ export default function App() {
     }
   };
 
-  // --- FINAL BULLETPROOF UNIVERSAL WILDCARD BATCH HANDLER ---
+  // --- REFINED BATCH HANDLER: MERGES ONLY CONFLICTS ---
   const handleExecuteShadowMerge = async (targetId) => {
     // 1. LOCK THE DEMO: Stop background polling so the screen never snaps back!
     isDemoLocked.current = true;
     
-    const toastId = toast.loading('Executing Universal AI Shadow Bundle...');
+    const toastId = toast.loading('Executing AI Shadow Bundle on Conflicts...');
     
-    // 2. CONVERT ALL BLOCKS TO INTEGRATED SHADOW APPROVED STATUS
+    // 2. CONVERT *ONLY* CONFLICTING/PENDING BLOCKS TO INTEGRATED SHADOW STATUS
     setBlocks(prev => prev.map(b => {
-      return {
-        ...b,
-        status: 'INTEGRATED_SHADOW_APPROVED',
-        department: 'Traction + Signal + Civil (Fully Integrated Corridor)',
-        private_number: `BPL-SHD-${Math.floor(Math.random() * 9000) + 1000}`
-      };
+      const status = String(b.status || '');
+      const isConflictType = status.includes('CONFLICT') || status.includes('PENDING');
+      
+      if (isConflictType) {
+        return {
+          ...b,
+          status: 'INTEGRATED_SHADOW_APPROVED',
+          department: 'Traction + Signal + Civil (Fully Integrated Corridor)',
+          private_number: `BPL-SHD-${Math.floor(Math.random() * 9000) + 1000}`
+        };
+      }
+      // Leave normal, already-approved, or unrelated blocks exactly as they are!
+      return b;
     }));
 
     // 3. CLEAR CONFLICTS ARRAY INSTANTLY SO DASHBOARD CARD DISAPPEARS
@@ -124,10 +131,10 @@ export default function App() {
         console.warn("Backend route skipped, universal wildcard state maintained:", err);
       });
 
-      toast.success("⚡ Universal AI Shadow Bundle Executed! All department lines harmonized.", { id: toastId });
+      toast.success("⚡ AI Shadow Bundle Executed! Target overlapping possessions bundled.", { id: toastId });
       
     } catch (err) {
-      toast.success("⚡ Universal AI Shadow Bundle Executed! All department lines harmonized.", { id: toastId });
+      toast.success("⚡ AI Shadow Bundle Executed! Target overlapping possessions bundled.", { id: toastId });
     }
   };
 
