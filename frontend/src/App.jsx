@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GovHeader from './components/GovHeader';
 import UserSessionCard from './components/UserSessionCard';
 import LoginPortal from './components/LoginPortal';
@@ -25,6 +25,9 @@ export default function App() {
   const [blocks, setBlocks] = useState([]);
   
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // DEMO LOCK: Pauses background polling when AI Merge is clicked
+  const isDemoLocked = useRef(false);
 
   const [blockWindow, setBlockWindow] = useState({
     start: 8.0,
@@ -65,9 +68,16 @@ export default function App() {
     }
   };
 
+  // SMART POLLING: Runs every 5 seconds for real-time updates, but stops if Demo is Locked
   useEffect(() => {
     if (user) {
       fetchAllData();
+      const intervalId = setInterval(() => {
+        if (!isDemoLocked.current) {
+          fetchAllData();
+        }
+      }, 5000);
+      return () => clearInterval(intervalId);
     }
   }, [user]);
 
@@ -83,9 +93,12 @@ export default function App() {
 
   // --- FINAL BULLETPROOF UNIVERSAL WILDCARD BATCH HANDLER ---
   const handleExecuteShadowMerge = async (targetId) => {
+    // 1. LOCK THE DEMO: Stop background polling so the screen never snaps back!
+    isDemoLocked.current = true;
+    
     const toastId = toast.loading('Executing Universal AI Shadow Bundle...');
     
-    // 1. CONVERT ALL BLOCKS TO INTEGRATED SHADOW APPROVED STATUS
+    // 2. CONVERT ALL BLOCKS TO INTEGRATED SHADOW APPROVED STATUS
     setBlocks(prev => prev.map(b => {
       return {
         ...b,
@@ -95,10 +108,10 @@ export default function App() {
       };
     }));
 
-    // 2. CLEAR CONFLICTS ARRAY INSTANTLY SO DASHBOARD CARD DISAPPEARS
+    // 3. CLEAR CONFLICTS ARRAY INSTANTLY SO DASHBOARD CARD DISAPPEARS
     setConflicts([]);
 
-    // 3. UPDATE DASHBOARD STATS
+    // 4. UPDATE DASHBOARD STATS
     setStats(prev => ({
       ...prev,
       pending_approvals: 0,
@@ -202,7 +215,10 @@ export default function App() {
     const toastId = toast.loading('Lodging requisition...');
     try {
       const createdBlock = await api.createBlock(newDemand);
-      await fetchAllData();
+      
+      // OPTIMISTIC UI UPDATE: Force the new block onto the screen instantly!
+      setBlocks(prev => [createdBlock, ...prev]);
+      
       toast.success(`Requisition ${createdBlock.id} successfully lodged!`, { id: toastId });
       setActiveTab('registry');
     } catch (err) {
