@@ -5,14 +5,15 @@ from app.database import engine, Base, get_db
 
 # Import models so SQLAlchemy knows what to build
 from app import models 
+
 # --- IMPORT THE SEED FUNCTION ---
-from app.seed import seed 
+# from app.seed import seed 
 
 # Automatically create database tables on startup
 Base.metadata.create_all(bind=engine)
 
 # --- RUN THE SEED FUNCTION TO POPULATE USERS ---
-seed() 
+# seed() 
 
 app = FastAPI(title="IR-AIS API")
 
