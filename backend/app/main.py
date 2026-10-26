@@ -6,14 +6,14 @@ from app.database import engine, Base, get_db
 # Import models so SQLAlchemy knows what to build
 from app import models 
 
-# --- IMPORT THE SEED FUNCTION ---
-# from app.seed import seed 
+# --- UNCOMMENTED: IMPORT THE SEED FUNCTION ---
+from app.seed import seed 
 
 # Automatically create database tables on startup
 Base.metadata.create_all(bind=engine)
 
-# --- RUN THE SEED FUNCTION TO POPULATE USERS ---
-# seed() 
+# --- UNCOMMENTED: RUN THE SEED FUNCTION TO POPULATE USERS ---
+seed() 
 
 app = FastAPI(title="IR-AIS API")
 
@@ -36,11 +36,8 @@ app.add_middleware(
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
-# --- NEW REJECT ENDPOINT ADDED HERE ---
 @app.post("/api/blocks/{block_id}/reject")
 async def reject_block(block_id: str, db: Session = Depends(get_db)):
-    # Assuming your SQLAlchemy model is named Block. 
-    # If it's named something else like BlockRequest, change models.Block below!
     block = db.query(models.Block).filter(models.Block.id == block_id).first()
     if not block:
         raise HTTPException(status_code=404, detail="Block not found")
@@ -49,7 +46,6 @@ async def reject_block(block_id: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(block)
     return block
-# --------------------------------------
 
 from app.routers.auth_router import router as auth_router
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
